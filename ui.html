@@ -2,6 +2,7 @@
 <p>Component: <input id="comp" type="text" value=''></p>
 <p>Instances: <input id="instances" type="number" value="0"></p>
 <button id="count">Count</button>
+<button id="zoom">Zoom to selection</button>
 <button id="clear">Clear</button>
 <script>
 
@@ -9,22 +10,20 @@
   const instanceTextBox = document.getElementById('instances');
   
   document.getElementById('count').onclick = () => {
-    
     parent.postMessage({ pluginMessage: { type: 'count-instances' } }, '*')
-
     onmessage = (event) => {
-
       compTextBox.value = event.data.pluginMessage.componentName
       instanceTextBox.value = event.data.pluginMessage.instanceCount
-
     }
-    
   }
+
+  document.getElementById('zoom').onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'zoom-instances' } }, '*')
+    }
 
   document.getElementById('clear').onclick = () => {
     compTextBox.value = ''
     instanceTextBox.value = 0
-
     parent.postMessage({ pluginMessage: { type: 'clear-ui' } }, '*')
   }
 

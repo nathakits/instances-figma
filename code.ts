@@ -12,10 +12,9 @@ figma.showUI(__html__);
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 
-
 figma.ui.onmessage = msg => {
   const selection = figma.currentPage.selection
-  let pageChildren = figma.currentPage.children
+  const pageChildren = figma.currentPage.children
   const nodes = []
   
   let obj: { componentName?: string; componentId?: string; instanceCount?: number; } = { 
@@ -24,12 +23,14 @@ figma.ui.onmessage = msg => {
     instanceCount: 0
   };
   
-  // One way of distinguishing between different types of messages sent from
-  // your HTML page is to use an object with a "type" property like this.
+  // count instances
+  // TODO: check for nested frames and groups
   if (msg.type === 'count-instances') {
     if (selection.length == 1) {
       let componentName = selection[0].name
       let componentId = selection[0].id
+
+        // loop top level objects in the page
       for (let i = 0; i < pageChildren.length; i++) {
         const children = pageChildren[i];
         if (children.type === 'INSTANCE') {
@@ -39,11 +40,18 @@ figma.ui.onmessage = msg => {
           }
         }
       }
+
       figma.currentPage.selection = nodes
-      figma.viewport.scrollAndZoomIntoView(nodes)
       obj.componentName = componentName
       obj.componentId = componentId
       figma.ui.postMessage(obj)
+    }
+  }
+
+  // zoom to selection
+  if (msg.type === 'zoom-instances') {
+    if (figma.currentPage.selection.length > 0) {
+      figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection)
     }
   }
 };
