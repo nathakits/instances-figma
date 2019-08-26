@@ -70,6 +70,19 @@ figma.ui.onmessage = msg => {
                                 obj.instanceCount = nodes.length;
                             }
                         }
+                        // group within a group - depth 3
+                        if (child.type === 'GROUP') {
+                            const nestGroupChild = child.children;
+                            for (let i = 0; i < nestGroupChild.length; i++) {
+                                const child = nestGroupChild[i];
+                                if (child.type === 'INSTANCE') {
+                                    if (child.masterComponent.id === selection[0].id) {
+                                        nodes.push(child);
+                                        obj.instanceCount = nodes.length;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
