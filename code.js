@@ -26,10 +26,50 @@ figma.ui.onmessage = msg => {
             // loop top level objects in the page
             for (let i = 0; i < pageChildren.length; i++) {
                 const children = pageChildren[i];
+                // count top-level instances - depth 1
                 if (children.type === 'INSTANCE') {
                     if (children.masterComponent.id === selection[0].id) {
                         nodes.push(children);
                         obj.instanceCount = nodes.length;
+                    }
+                }
+                // count nested groups - depth 2
+                if (children.type === 'GROUP') {
+                    const groupChild = children.children;
+                    for (let i = 0; i < groupChild.length; i++) {
+                        const child = groupChild[i];
+                        if (child.type === 'INSTANCE') {
+                            if (child.masterComponent.id === selection[0].id) {
+                                nodes.push(child);
+                                obj.instanceCount = nodes.length;
+                            }
+                        }
+                        // group within a group - depth 3
+                        if (child.type === 'GROUP') {
+                            const nestGroupChild = child.children;
+                            for (let i = 0; i < nestGroupChild.length; i++) {
+                                const child = nestGroupChild[i];
+                                if (child.type === 'INSTANCE') {
+                                    if (child.masterComponent.id === selection[0].id) {
+                                        nodes.push(child);
+                                        obj.instanceCount = nodes.length;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // count nested frame - depth 2
+                if (children.type === 'FRAME') {
+                    const frameChild = children.children;
+                    for (let i = 0; i < frameChild.length; i++) {
+                        const child = frameChild[i];
+                        if (child.type === 'INSTANCE') {
+                            if (child.masterComponent.id === selection[0].id) {
+                                nodes.push(child);
+                                obj.instanceCount = nodes.length;
+                            }
+                        }
                     }
                 }
             }
