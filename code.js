@@ -20,19 +20,46 @@ figma.ui.onmessage = msg => {
     // count instances
     // TODO: check for nested frames and groups
     if (msg.type === 'count-instances') {
-        if (selection.length == 1) {
+        if (selection.length === 1 && selection[0].type === "COMPONENT") {
             let componentName = selection[0].name;
             let componentId = selection[0].id;
             // loop top level objects in the page
             for (let i = 0; i < pageChildren.length; i++) {
                 const children = pageChildren[i];
+                // INSTANCE
                 // count top-level instances - depth 1
                 if (children.type === 'INSTANCE') {
                     if (children.masterComponent.id === selection[0].id) {
                         nodes.push(children);
                         obj.instanceCount = nodes.length;
                     }
+                    else {
+                        const frameChild = children.children;
+                        for (let i = 0; i < frameChild.length; i++) {
+                            const child = frameChild[i];
+                            if (child.type === 'INSTANCE') {
+                                if (child.masterComponent.id === selection[0].id) {
+                                    nodes.push(child);
+                                    obj.instanceCount = nodes.length;
+                                }
+                            }
+                            // group within a group - depth 3
+                            if (child.type === 'GROUP') {
+                                const nestGroupChild = child.children;
+                                for (let i = 0; i < nestGroupChild.length; i++) {
+                                    const child = nestGroupChild[i];
+                                    if (child.type === 'INSTANCE') {
+                                        if (child.masterComponent.id === selection[0].id) {
+                                            nodes.push(child);
+                                            obj.instanceCount = nodes.length;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                // GROUPS
                 // count nested groups - depth 2
                 if (children.type === 'GROUP') {
                     const groupChild = children.children;
@@ -59,8 +86,36 @@ figma.ui.onmessage = msg => {
                         }
                     }
                 }
+                // FRAMES
                 // count nested frame - depth 2
                 if (children.type === 'FRAME') {
+                    const frameChild = children.children;
+                    for (let i = 0; i < frameChild.length; i++) {
+                        const child = frameChild[i];
+                        if (child.type === 'INSTANCE') {
+                            if (child.masterComponent.id === selection[0].id) {
+                                nodes.push(child);
+                                obj.instanceCount = nodes.length;
+                            }
+                        }
+                        // group within a group - depth 3
+                        if (child.type === 'GROUP') {
+                            const nestGroupChild = child.children;
+                            for (let i = 0; i < nestGroupChild.length; i++) {
+                                const child = nestGroupChild[i];
+                                if (child.type === 'INSTANCE') {
+                                    if (child.masterComponent.id === selection[0].id) {
+                                        nodes.push(child);
+                                        obj.instanceCount = nodes.length;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // COMPONENTS
+                // count nested component - depth 2
+                if (children.type === 'COMPONENT') {
                     const frameChild = children.children;
                     for (let i = 0; i < frameChild.length; i++) {
                         const child = frameChild[i];
@@ -90,6 +145,9 @@ figma.ui.onmessage = msg => {
             obj.componentName = componentName;
             obj.componentId = componentId;
             figma.ui.postMessage(obj);
+        }
+        else {
+            figma.notify("Please select 1 Component object");
         }
     }
     // zoom to selection
