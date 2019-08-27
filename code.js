@@ -8,6 +8,11 @@ figma.showUI(__html__);
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
+// TODO: 
+// make a function to find all page nodes and store that locally or in an array?
+// then use count-instances to access the array
+// Can either be incorporated into the count button to first calculate then count
+// if the cache is the same then don't have to recalculate
 figma.ui.onmessage = msg => {
     const selection = figma.currentPage.selection;
     const pageChildren = figma.currentPage.children;
