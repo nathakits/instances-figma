@@ -13,6 +13,8 @@ figma.showUI(__html__);
 // then use count-instances to access the array
 // Can either be incorporated into the count button to first calculate then count
 // if the cache is the same then don't have to recalculate
+// TODO:
+// delete option if component doesn't have instances
 figma.ui.onmessage = msg => {
     const selection = figma.currentPage.selection;
     const pageChildren = figma.currentPage.children;
