@@ -162,5 +162,52 @@ figma.ui.onmessage = msg => {
         if (figma.currentPage.selection.length > 0) {
             figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
         }
+        else {
+            figma.notify("Please select more than 1 object to zoom");
+        }
     }
 };
+let count = 0;
+function traverse(node) {
+    // if the node has children
+    if ("children" in node) {
+        count++;
+        for (const child of node.children) {
+            traverse(child);
+        }
+    }
+}
+// traverse page
+function walker(children, selection, nodeType, nodes, obj) {
+    if (nodeType === 'INSTANCE') {
+        if (children.masterComponent.id === selection[0].id) {
+            nodes.push(children);
+            obj.instanceCount = nodes.length;
+        }
+        else {
+            const frameChild = children.children;
+            for (let i = 0; i < frameChild.length; i++) {
+                const child = frameChild[i];
+                if (child.type === 'INSTANCE') {
+                    if (child.masterComponent.id === selection[0].id) {
+                        nodes.push(child);
+                        obj.instanceCount = nodes.length;
+                    }
+                }
+                // group within a group - depth 3
+                if (child.type === 'GROUP') {
+                    const nestGroupChild = child.children;
+                    for (let i = 0; i < nestGroupChild.length; i++) {
+                        const child = nestGroupChild[i];
+                        if (child.type === 'INSTANCE') {
+                            if (child.masterComponent.id === selection[0].id) {
+                                nodes.push(child);
+                                obj.instanceCount = nodes.length;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
